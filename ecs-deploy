@@ -71,6 +71,10 @@ function require {
     }
 }
 
+function getnumberofdeployments {
+  NUM_DEPLOYMENTS=$($AWS_ECS describe-services --services $SERVICE --cluster $CLUSTER | jq "[.services[].deployments[]] | length")
+}
+
 # Check for AWS, AWS Command Line Interface
 require aws
 # Check for jq, Command-line JSON processor
@@ -350,7 +354,7 @@ else
           | grep -e "RUNNING") || :
 
         if [ "$RUNNING" ]; then
-          NUM_DEPLOYMENTS=$($AWS_ECS describe-services --services $SERVICE --cluster $CLUSTER | jq "[.services[].deployments[]] | length")
+          getnumberofdeployments
 
           while [ $i -lt $TIMEOUT ]
           do
@@ -366,7 +370,7 @@ else
               i=$(( $i + $every ))
             fi
 
-            NUM_DEPLOYMENTS=$($AWS_ECS describe-services --services $SERVICE --cluster $CLUSTER | jq "[.services[].deployments[]] | length")
+            getnumberofdeployments
           done
 
           if [ "$DEPLOYMENT_SUCCESS" = false ]; then
